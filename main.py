@@ -5,7 +5,7 @@ from lib.train_ae import train_autoencoder
 from lib.detect import evaluate_detection
 from lib.output_dirs import create_run_dir
 
-DATASETS = ["BeetleFly", "Car", "Coffee", "Computer",
+DATASETS = ["BeetleFly", "Car", "Coffee", "Computers",
             "ECG200", "ShapeletSim", "ToeSegmentation2"]
 MODEL_TYPE = "fcn"
 

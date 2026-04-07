@@ -4,11 +4,8 @@ import tensorflow as tf
 from sklearn.metrics import mean_absolute_error
 from scipy.optimize import differential_evolution
 
-import sys
-sys.path.append("../lib")
-
 from lib.preprocess import load_data, load_model, save_org_data, save_ae_data
-from keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 
 # 目的関数の定義
 def objective_function_multiitem(perturbations, model, x, y, nb_classes):
