@@ -1,0 +1,10 @@
+torch
+torchvision
+matplotlib
+numpy
+aeon
+tensorflow
+pandas
+scipy
+scikit-learn
+openpyxl
