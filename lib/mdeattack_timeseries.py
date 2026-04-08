@@ -7,6 +7,40 @@ from scipy.optimize import differential_evolution
 from lib.preprocess import load_data, load_model, save_org_data, save_ae_data
 from tensorflow.keras.utils import to_categorical
 
+# 評価関数の定義
+def eval_misclassification(probs, perturbations, label, original_x, perturbed_x, lim):
+    return -(1 - probs[0, label])
+
+def eval_combined_normalized(probs, perturbations, label, original_x, perturbed_x, lim):
+    alpha = perturbations[-1]  # DEで最適化されるα値 (0.0〜1.0)
+
+    misclass_score = -(1 - probs[0, label])
+    mae = np.mean(np.abs(perturbed_x - original_x))
+    perturb_score = -max(0.0, 1 - (mae / lim))
+    return alpha * misclass_score + (1-alpha) * perturb_score
+
+def eval_misclass_with_lim(probs, perturbations, label, original_x, perturbed_x, lim):
+    """
+    誤分類 + lim最小化 の2項を組み合わせた評価関数
+    誤分類を優先しつつ、limが小さいほど良い評価を与える
+    """
+    alpha = 0.7   # 誤分類の重み
+    beta  = 0.3   # lim最小化の重み
+
+    # 誤分類スコア: 元ラベルの信頼度が低いほど良い (負値、小さいほど良い)
+    misclass_score = -(1 - probs[0, label])
+
+    # limスコア: limが小さいほど良い (負値、小さいほど良い)
+    lim_score = -(1 - (lim / LIM_MAX))
+
+    return alpha * misclass_score + beta * lim_score
+
+eval_funcs = {
+    "misclassification": eval_misclassification,
+    # "combined_normalized": eval_combined_normalized,
+    # "misclass_with_lim": eval_misclass_with_lim
+}
+
 # 目的関数の定義
 def objective_function_multiitem(perturbations, model, x, y, nb_classes):
 
@@ -25,6 +59,7 @@ def objective_function_multiitem(perturbations, model, x, y, nb_classes):
     prep = model(x)
 
     return -(1-prep.numpy()[0, label]) #誤分類確率を負に変換、値が小さいほど良い個体
+
 
 def main(dataset, model_type):
     
